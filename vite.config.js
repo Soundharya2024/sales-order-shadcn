@@ -4,6 +4,7 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/sales-order-shadcn",
   plugins: [react()],
   resolve: {
     alias: {
