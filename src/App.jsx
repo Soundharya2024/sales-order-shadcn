@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
@@ -33,6 +33,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import ProductRow from "./components/ProductRow";
+
 const formSchema = z.object({
   Customer: z.string(),
   Order_Date: z.date().refine((date) => !isNaN(date.getTime()), {
@@ -43,6 +45,9 @@ const formSchema = z.object({
     .nonempty({ message: "Kindly choose the Sales Person" }),
   Branch: z.string().nonempty("Kindly choose the Branch"),
   Home_Delivery: z.boolean(),
+  Product_Name: z.string().nonempty("Kindly choose the Product Name"),
+  Product_Quantity: z.number(),
+  Product_Description: z.string(),
 });
 
 const App = () => {
@@ -54,6 +59,9 @@ const App = () => {
       Sales_Person: "",
       Branch: "",
       Home_Delivery: false,
+      Product_Name: "",
+      Product_Quantity: 1,
+      Product_Description: "",
     },
   });
 
@@ -66,14 +74,14 @@ const App = () => {
   };
 
   return (
-    <div className="rounded border border-solid border-gray-300 md:m-5 m-8">
-      <div className="p-5 bg-[#FAFBFE] ">
+    <>
+      <div className="p-2 bg-[#FAFBFE] ">
         <h4>Add Sales</h4>
       </div>
-      <div className="px-5 pb-5">
+      <div className="px-2 pb-2">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 py-5 gap-5 justify-items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 py-2 gap-2 justify-items-start">
               <FormField
                 control={form.control}
                 name="Customer"
@@ -199,7 +207,14 @@ const App = () => {
                 )}
               ></FormField>
             </div>
-            <div className="flex justify-end gap-4">
+            <div className="flex border-b-2 gap-2 py-2">
+              <div className="grow max-w-[300px]">Product</div>
+              <div className="grow max-w-[300px]">Quantity</div>
+              <div className="grow max-w-[300px]">Description</div>
+              <div className="grow-0 w-[40px]"></div>
+            </div>
+            <ProductRow form={form} />
+            <div className="flex justify-end gap-4 pt-2">
               <Button variant="secondary" className="w-28">
                 Reset
               </Button>
@@ -210,7 +225,7 @@ const App = () => {
           </form>
         </Form>
       </div>
-    </div>
+    </>
   );
 };
 
