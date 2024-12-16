@@ -35,7 +35,9 @@ import {
 
 const formSchema = z.object({
   Customer: z.string(),
-  Order_Date: z.string().nonempty("Kindly choose the Order Date"),
+  Order_Date: z.date().refine((date) => !isNaN(date.getTime()), {
+    message: "Kindly choose a valid date" /* Checks for invalid date */,
+  }),
   Sales_Person: z
     .string()
     .nonempty({ message: "Kindly choose the Sales Person" }),
@@ -48,7 +50,7 @@ const App = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       Customer: "",
-      Order_Date: format(new Date(), "dd-MMM-yyy"),
+      Order_Date: new Date(),
       Sales_Person: "",
       Branch: "",
       Home_Delivery: false,
@@ -56,7 +58,11 @@ const App = () => {
   });
 
   const onSubmit = async (data) => {
-    console.log("Form Data:", data);
+    const formattedData = {
+      ...data,
+      Order_Date: format(data.Order_Date, "dd-MMM-yyyy"), // Format the date
+    };
+    console.log("Form Data:", formattedData);
   };
 
   return (
@@ -70,7 +76,7 @@ const App = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 py-5 gap-5 justify-items-start">
               <FormField
                 control={form.control}
-                name="customer"
+                name="Customer"
                 render={({ field }) => (
                   <FormItem className="sm:w-full w-[300px] md:max-w-[300px]">
                     <FormLabel>Customer</FormLabel>
@@ -109,7 +115,7 @@ const App = () => {
                           >
                             <CalendarIcon className="h-4 w-4 opacity-50" />
                             {field.value ? (
-                              String(format(field.value, "dd-MMM-yyyy"))
+                              format(field.value, "dd-MMM-yyyy")
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -182,10 +188,13 @@ const App = () => {
                     <FormControl>
                       <Checkbox
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) =>
+                          field.onChange(!!checked)
+                        } /* to ensure it handles boolean values only */
                       />
                     </FormControl>
                     <FormLabel>Home Delivery</FormLabel>
+                    <FormMessage />
                   </FormItem>
                 )}
               ></FormField>
