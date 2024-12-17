@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/select";
 
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, CirclePlus as AddIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -45,12 +46,23 @@ const formSchema = z.object({
     .nonempty({ message: "Kindly choose the Sales Person" }),
   Branch: z.string().nonempty("Kindly choose the Branch"),
   Home_Delivery: z.boolean(),
-  Product_Name: z.string().nonempty("Kindly choose the Product Name"),
-  Product_Quantity: z.number(),
-  Product_Description: z.string(),
+  products: z
+    .array(
+      z.object({
+        Product_Name: z.string().nonempty("Kindly choose the Product Name"),
+        Product_Quantity: z.coerce
+          .number()
+          .int()
+          .positive({ message: "Quantity must be greater than zero" }),
+        Product_Description: z.string(),
+      })
+    )
+    .nonempty({ message: "Kindly add atleast one product" }),
 });
 
 const App = () => {
+  const [products, setProducts] = useState([]);
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,11 +71,30 @@ const App = () => {
       Sales_Person: "",
       Branch: "",
       Home_Delivery: false,
+      products: [],
+    },
+  });
+
+  const addRow = () => {
+    const newProduct = {
+      id: Date.now(),
       Product_Name: "",
       Product_Quantity: 1,
       Product_Description: "",
-    },
-  });
+    };
+
+    setProducts((prevProducts) => {
+      const updatedProducts = [...prevProducts, newProduct];
+      form.setValue("products", updatedProducts); // Sync with React Hook Form
+      return updatedProducts;
+    });
+  };
+
+  const deleteRow = (id) => {
+    const updatedProducts = products.filter((product) => product.id !== id);
+    setProducts(updatedProducts);
+    form.setValue("products", updatedProducts); // Sync with React Hook Form
+  };
 
   const onSubmit = async (data) => {
     const formattedData = {
@@ -207,15 +238,45 @@ const App = () => {
                 )}
               ></FormField>
             </div>
-            <div className="flex border-b-2 gap-2 py-2">
-              <div className="grow max-w-[300px]">Product</div>
-              <div className="grow max-w-[300px]">Quantity</div>
-              <div className="grow max-w-[300px]">Description</div>
-              <div className="grow-0 w-[40px]"></div>
+            <div className="border-b-2 mb-2">
+              <div className="flex border-b-2 gap-2 py-2">
+                <div className="grow max-w-[300px]">Product</div>
+                <div className="grow max-w-[300px]">Quantity</div>
+                <div className="grow max-w-[300px]">Description</div>
+                <div className="grow-0 w-[40px] ml-auto"></div>
+              </div>
+              <div className="flex flex-col divide-y">
+                {products.length > 0 ? (
+                  products.map((product, index) => (
+                    <ProductRow
+                      key={product.id}
+                      form={form}
+                      product={product}
+                      productIndex={index}
+                      productsStateHandler={setProducts}
+                      removeRow={deleteRow}
+                    />
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500">No products added</p>
+                )}
+              </div>
             </div>
-            <ProductRow form={form} />
+            <Button variant="ghost" type="button" onClick={addRow}>
+              <AddIcon /> Add Row
+            </Button>
+            {form.formState.errors.products && (
+              <p className="text-red-500 font-medium text-sm">
+                {form.formState.errors.products.message}
+              </p>
+            )}
             <div className="flex justify-end gap-4 pt-2">
-              <Button variant="secondary" className="w-28">
+              <Button
+                variant="secondary"
+                type="button"
+                className="w-28"
+                onClick={() => form.reset(form.defaultValues)}
+              >
                 Reset
               </Button>
               <Button type="submit" className="w-28">
