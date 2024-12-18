@@ -34,7 +34,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import ProductRow from "./components/ProductRow";
+import AddNewDialog from "./components/AddNewDialog";
 
 const formSchema = z.object({
   Customer: z.string(),
@@ -117,7 +127,7 @@ const App = () => {
                 control={form.control}
                 name="Customer"
                 render={({ field }) => (
-                  <FormItem className="sm:w-full w-[300px] md:max-w-[300px]">
+                  <FormItem className="w-[300px] max-w-[300px]">
                     <FormLabel>Customer</FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -140,7 +150,7 @@ const App = () => {
                 control={form.control}
                 name="Order_Date"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col sm:w-full w-[300px] md:max-w-[300px]">
+                  <FormItem className="flex flex-col justify-end w-[300px] max-w-[300px]">
                     <FormLabel>Order Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -177,7 +187,7 @@ const App = () => {
                 control={form.control}
                 name="Sales_Person"
                 render={({ field }) => (
-                  <FormItem className="sm:w-full w-[300px] md:max-w-[300px]">
+                  <FormItem className="w-[300px] max-w-[300px]">
                     <FormLabel>Sales Person</FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -200,7 +210,7 @@ const App = () => {
                 control={form.control}
                 name="Branch"
                 render={({ field }) => (
-                  <FormItem className="sm:w-full w-[300px] md:max-w-[300px]">
+                  <FormItem className="w-[300px] max-w-[300px]">
                     <FormLabel>Branch</FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -238,14 +248,16 @@ const App = () => {
                 )}
               ></FormField>
             </div>
-            <div className="border-b-2 mb-2">
-              <div className="flex border-b-2 gap-2 py-2">
-                <div className="grow max-w-[300px]">Product</div>
-                <div className="grow max-w-[300px]">Quantity</div>
-                <div className="grow max-w-[300px]">Description</div>
-                <div className="grow-0 w-[40px] ml-auto"></div>
-              </div>
-              <div className="flex flex-col divide-y">
+            <Table className="w-fit">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead></TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="border-b">
                 {products.length > 0 ? (
                   products.map((product, index) => (
                     <ProductRow
@@ -258,10 +270,17 @@ const App = () => {
                     />
                   ))
                 ) : (
-                  <p className="text-center text-gray-500">No products added</p>
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-gray-500"
+                    >
+                      No products added
+                    </TableCell>
+                  </TableRow>
                 )}
-              </div>
-            </div>
+              </TableBody>
+            </Table>
             <Button variant="ghost" type="button" onClick={addRow}>
               <AddIcon /> Add Row
             </Button>
@@ -285,6 +304,8 @@ const App = () => {
             </div>
           </form>
         </Form>
+        <AddNewDialog dialogType="Customer" />
+        <AddNewDialog dialogType="Product" />
       </div>
     </>
   );
